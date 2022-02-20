@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import React from 'react'
 import { IconType } from 'react-icons'
 
@@ -9,11 +10,14 @@ const style = {
 }
 
 function SidebarOption({ text, Icon, isActive, setSelected, redirect }) {
+  const router = useRouter()
+
   return (
     <div
       className={style.wrapper}
       onClick={() => {
         setSelected(text)
+        router.push(redirect)
       }}
     >
       <div className={style.iconContainer}>
