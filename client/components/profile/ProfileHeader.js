@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import { TwitterContext } from '../../context/TwitterContext'
 import { BsArrowLeftShort } from 'react-icons/bs'
 import { useRouter } from 'next/router'
 
@@ -21,9 +22,8 @@ const style = {
 
 function ProfileHeader() {
   const router = useRouter()
+  const { currentAccount, currentUser } = useContext(TwitterContext)
   const isProfileImageNft = true
-
-  const currentAccount = '32632gsg232ggd6232ghh26'
 
   return (
     <div className={style.wrapper}>
@@ -32,15 +32,15 @@ function ProfileHeader() {
           <BsArrowLeftShort />
         </div>
         <div className={style.details}>
-          <div className={style.primary}>Rakshith Raj</div>
-          <div className={style.secondary}>3 Tweets</div>
+          <div className={style.primary}>{currentUser.name}</div>
+          <div className={style.secondary}>
+            {currentUser.tweets?.length} Tweets
+          </div>
         </div>
       </div>
       <div className={style.coverPhotoContainer}>
         <img
-          src={
-            'https://www.incimages.com/uploaded_files/image/1920x1080/getty_509107562_2000133320009280346_351827.jpg'
-          }
+          src={currentUser.coverImage}
           alt="cover"
           className={style.coverPhoto}
         />
@@ -50,12 +50,12 @@ function ProfileHeader() {
           className={isProfileImageNft ? 'hex' : style.profileImageContainer}
         >
           <img
-            src={
-              'https://lh3.googleusercontent.com/ogw/ADea4I4RWYu34DBMProuf-PeKrqY9C7vhPKFiWMKBKXgxw=s64-c-mo'
-            }
-            alt={'wallet Address'}
+            src={currentUser.profileImage}
+            alt={currentUser.walletAddress}
             className={
-              isProfileImageNft ? style.profileImageNft : style.profileImage
+              currentUser.isProfileImageNft
+                ? style.profileImageNft
+                : style.profileImage
             }
           />
         </div>

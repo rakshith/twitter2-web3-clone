@@ -4,6 +4,7 @@ import { useContext, useEffect } from 'react'
 import { BsStars } from 'react-icons/bs'
 import TweetBox from './TweetBox'
 import Post from '../Post'
+import { TwitterContext } from '../../context/TwitterContext'
 
 const style = {
   wrapper: `flex-[2] border-r border-l border-[#38444d] overflow-y-scroll`,
@@ -11,46 +12,9 @@ const style = {
   headerTitle: `text-xl font-bold`,
 }
 
-const tweets = [
-  {
-    displayName: 'Rakshit',
-    userName: 'dafdsf332323afdddsdsd',
-    avatar:
-      'https://lh3.googleusercontent.com/ogw/ADea4I4RWYu34DBMProuf-PeKrqY9C7vhPKFiWMKBKXgxw=s64-c-mo',
-    text: 'gm',
-    isProfileImageNft: false,
-    timestamp: '2021-02-14T12:00:00.000Z',
-  },
-  {
-    displayName: 'Rakshit',
-    userName: 'dafdsf332323afdddsdsd',
-    avatar:
-      'https://lh3.googleusercontent.com/ogw/ADea4I4RWYu34DBMProuf-PeKrqY9C7vhPKFiWMKBKXgxw=s64-c-mo',
-    text: 'gm',
-    isProfileImageNft: false,
-    timestamp: '2021-09-14T12:00:00.000Z',
-  },
-  {
-    displayName: 'Rakshit',
-    userName: 'dafdsf332323afdddsdsd',
-    avatar:
-      'https://lh3.googleusercontent.com/ogw/ADea4I4RWYu34DBMProuf-PeKrqY9C7vhPKFiWMKBKXgxw=s64-c-mo',
-    text: 'gm',
-    isProfileImageNft: false,
-    timestamp: '2021-04-14T12:00:00.000Z',
-  },
-  {
-    displayName: 'Rakshit',
-    userName: 'dafdsf332323afdddsdsd',
-    avatar:
-      'https://lh3.googleusercontent.com/ogw/ADea4I4RWYu34DBMProuf-PeKrqY9C7vhPKFiWMKBKXgxw=s64-c-mo',
-    text: 'gm',
-    isProfileImageNft: false,
-    timestamp: '2022-01-14T12:00:00.000Z',
-  },
-]
-
 function Feed() {
+  const { tweets } = useContext(TwitterContext)
+
   return (
     <div className={`${style.wrapper} no-scrollbar`}>
       <div className={style.header}>
@@ -61,13 +25,21 @@ function Feed() {
       {tweets.map((tweet, index) => (
         <div key={index}>
           <Post
-            displayName={tweet.displayName}
-            userName={`${tweet.userName.slice(0, 4)}...${tweet.userName.slice(
-              -4
-            )}`}
-            avatar={tweet.avatar}
-            text={tweet.text}
-            isProfileImageNft={tweet.isProfileImageNft}
+            displayName={
+              tweet.author.name === 'Unnamed'
+                ? `${tweet.author.walletAddress.slice(
+                    0,
+                    4
+                  )}...${tweet.author.walletAddress.slice(41)}`
+                : tweet.author.name
+            }
+            userName={`${tweet.author.walletAddress.slice(
+              0,
+              4
+            )}...${tweet.author.walletAddress.slice(41)}`}
+            text={tweet.tweet}
+            avatar={tweet.author.profileImage}
+            isProfileImageNft={tweet.author.isProfileImageNft}
             timestamp={tweet.timestamp}
           />
         </div>

@@ -6,11 +6,19 @@ export const TwitterContext = createContext()
 export const TwitterProvider = ({ children }) => {
   const [appStatus, setAppStatus] = useState('')
   const [currentAccount, setCurrentAccount] = useState('')
+  const [currentUser, setCurrentUser] = useState({})
+  const [tweets, setTweets] = useState([])
   const router = useRouter()
 
   useEffect(() => {
     checkIfWalletIsConnected()
   }, [])
+
+  useEffect(() => {
+    if (!currentAccount && appStatus == 'connected') return
+    getCurrentUserDetails(currentAccount)
+    fetchTweets()
+  }, [currentAccount, appStatus])
 
   /**
    * Initiates MetaMask wallet connection
@@ -82,9 +90,109 @@ export const TwitterProvider = ({ children }) => {
     }
   }
 
+  /**
+   * Generates NFT profile picture URL or returns the image URL if it's not an NFT
+   * @param {String} imageUri If the user has minted a profile picture, an IPFS hash; if not then the URL of their profile picture
+   * @param {Boolean} isNft Indicates whether the user has minted a profile picture
+   * @returns A full URL to the profile picture
+   */
+  const getNftProfileImage = async (imageUri, isNft) => {
+    if (isNft) {
+      return `https://gateway.pinata.cloud/ipfs/${imageUri}`
+    } else if (!isNft) {
+      return imageUri
+    }
+  }
+
+  /**
+   * Gets all the tweets stored in Sanity DB.
+   */
+  const fetchTweets = async () => {
+    const query = `
+    *[_type == "tweets"]{
+      "author": author->{name, walletAddress, profileImage, isProfileImageNft},
+      tweet,
+      timestamp
+    }|order(timestamp desc)
+  `
+
+    const sanityResponse = await client.fetch(query)
+
+    setTweets([])
+
+    sanityResponse.forEach(async (item) => {
+      const profileImageUrl = await getNftProfileImage(
+        item.author.profileImage,
+        item.author.isProfileImageNft
+      )
+
+      if (item.author.isProfileImageNft) {
+        const newItem = {
+          tweet: item.tweet,
+          timestamp: item.timestamp,
+          author: {
+            name: item.author.name,
+            walletAddress: item.author.walletAddress,
+            profileImage: profileImageUrl,
+            isProfileImageNft: item.author.isProfileImageNft,
+          },
+        }
+
+        setTweets((prevState) => [...prevState, newItem])
+      } else {
+        setTweets((prevState) => [...prevState, item])
+      }
+    })
+  }
+
+  /**
+   * Gets the current user details from Sanity DB.
+   * @param {String} userAccount Wallet address of the currently logged in user
+   * @returns null
+   */
+  const getCurrentUserDetails = async (userAccount = currentAccount) => {
+    if (appStatus !== 'connected') return
+
+    const query = `
+      *[_type == "users" && _id == "${userAccount}"]{
+        "tweets": tweets[]->{timestamp, tweet}|order(timestamp desc),
+        name,
+        profileImage,
+        isProfileImageNft,
+        coverImage,
+        walletAddress
+      }
+    `
+    const response = await client.fetch(query)
+
+    const profileImageUri = await getNftProfileImage(
+      response[0].profileImage,
+      response[0].isProfileImageNft
+    )
+
+    setCurrentUser({
+      tweets: response[0].tweets,
+      name: response[0].name,
+      profileImage: profileImageUri,
+      walletAddress: response[0].walletAddress,
+      coverImage: response[0].coverImage,
+      isProfileImageNft: response[0].isProfileImageNft,
+    })
+  }
+
   return (
     <TwitterContext.Provider
-      value={{ appStatus, currentAccount, connectWallet }}
+      value={{
+        appStatus,
+        currentAccount,
+        connectWallet,
+        tweets,
+        fetchTweets,
+        setAppStatus,
+        getNftProfileImage,
+        currentUser,
+        getCurrentUserDetails,
+      }}
     >
       {children}
     </TwitterContext.Provider>
