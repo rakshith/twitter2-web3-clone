@@ -10,7 +10,7 @@ const style = {
   backButton: `text-3xl cursor-pointer mr-2 rounded-full hover:bg-[#313b44] p-1`,
   coverPhotoContainer: `flex items-center justify-center h-[15vh] overflow-hidden`,
   coverPhoto: `object-cover h-full w-full`,
-  profileImageContainer: `w-full h-[6rem] rounded-full mt-[-3rem] mb-2 justify-start items-center px-3 flex justify-between`,
+  profileImageContainer: `w-full h-[6rem] rounded-full mt-[-3rem] mb-2 items-center px-3 flex justify-between`,
   profileImage: `object-cover rounded-full h-full`,
   profileImageNft: `object-cover h-full`,
   profileImageMint: `bg-white text-black px-3 py-1 rounded-full hover:bg-[#8899a6] cursor-pointer`,

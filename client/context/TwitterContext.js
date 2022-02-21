@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import React, { createContext, useEffect, useState } from 'react'
-
+import { client } from '../lib/client'
 export const TwitterContext = createContext()
 
 export const TwitterProvider = ({ children }) => {
@@ -52,13 +52,34 @@ export const TwitterProvider = ({ children }) => {
       if (addressArray.length > 0) {
         setAppStatus('connected')
         setCurrentAccount(addressArray[0])
-
         createUserAccount(addressArray[0])
       } else {
         router.push('/')
         setAppStatus('notConnected')
       }
     } catch (e) {}
+  }
+
+  const createUserAccount = async (userAddress = currentAccount) => {
+    if (!window.ethereum) return setAppStatus('noMetaMask')
+
+    try {
+      const userDoc = {
+        _type: 'users',
+        _id: userAddress,
+        name: 'Unnamed',
+        isProfileImageNft: false,
+        profileImage:
+          'https://about.twitter.com/content/dam/about-twitter/en/brand-toolkit/brand-download-img-1.jpg.twimg.1920.jpg',
+        walletAddress: userAddress,
+      }
+
+      await client.createIfNotExists(userDoc)
+      setAppStatus('connected')
+    } catch (error) {
+      router.push('/')
+      setAppStatus(error)
+    }
   }
 
   return (
